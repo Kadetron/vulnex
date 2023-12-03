@@ -3,14 +3,36 @@
 declare -a links
 declare -a list
 
+banner() {
+echo "
+                                        ▄███████████▄
+                                      ▄███████████████▄
+                                      ███         ▀████
+                                      █▀█           ███
+                                                    ███
+                                      ▄█▄           ███
+                                      ███           ███
+                                    ▄███████████████████▄
+                                   ██      Kadetron     ██
+                                   ██                   ██
+                                   ██        █▀▀█       ██
+                                   ██        ▄▄▄▄       ██
+                                   ██                   ██
+                                   ██       vulnex      ██
+                                   ▀█████████████████████▀
+
+
+"
+}
+banner
+
 if [ -p /dev/stdin ]
 then
     read url
-#elif [ -z "$*" ]
-#then
-#   banner
-#   echo -en "\e[1;36mEnter the URL: \e[0m"
-#   read url
+elif [ -z "$*" ]
+then
+   echo -en "\e[1;36mEnter the URL: \e[0m"
+   read url
 else
     url=$1
 fi
