@@ -9,36 +9,48 @@ declare -a list
 
     #elif [ -z "$*" ]
     #then
-#           bannet
+#           banner
 #        echo -en "\e[1;36mEnter the URL: \e[0m"
        # read url
     else
         url=$1
 
     fi
+user_agent="Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101 Firefox/91.0"
 scrape() {
-    user_agent="Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101 Firefox/91.0"
     baseUrl=$(echo $1 | awk -F "/" '{print $1 "/" $2 "/" $3}')
     dotUrl=$(echo ${1} | awk -F "?" '{print $1}' | sed -E 's>(/$)>>')
     ddotUrl=$(echo ${dotUrl} | sed -E -e 's>(.*\/)[^\/]+$>\1>' -e 's>(/$)>>')
     curl -H 'Accept-Language: en-US,en;q=0.5' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8' -A "$user_agent" -s -L "$1" | grep -Eo "href=[\"'][^#][^\"']+" | sed -E "s>href=(\"|')(\".*)?>>g" | sed -E -e "s>^(\/\/).+>https:&>" -e "s>^(\.\.)[\/](.*)>${ddotUrl}\/\2>" -e "s>^[\~\/|\/](.*)>$baseUrl\/\1>" -e "/^(http|tel)/!s>^(\.\/)?(.*)>${dotUrl}\/\2>" -e "s> >%20>g"
 }
+check() {
+    esc=$(printf '\033')
+    result=$(echo $1 |  grep ".php")
+    if [ $? -eq 0 ]
+    then
+            PHP=$(echo $1 | sed -E -e "s>(.+\.php).*>\1\/%27%22%60>g")
+            curl -H 'Accept-Language: en-US,en;q=0.5' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8' -A "$user_agent" -s -L $PHP | grep -qs "You have an error in your SQL syntax;" && echo $PHP | sed -e "s>^> $esc[31m[VULNERABLE]$esc[0m        >" ||  echo $PHP | sed -e "s>^> $esc[32m[NOT VULNERABLE]$esc[0m    >" | sed -E "s>(\/%27%22%60)>>g"
+    else
+        echo $1  | sed -e "s>^> ${esc}[1;30m\[NOT PARSABLE\]${esc}[0m      >"
+    fi
+}
 vuln() {
-    list=( $(scrape $url) )
+    list=( $(scrape $url | sort -u) )
     for i in ${list[@]}
     do
-            links=( $(scrape $i) )
-            echo ${links[@]}
-   done
-    #links=( $(for i in $1) )
-    #echo "${#links[@]}\n"
+        check $i
+        links=( $i $(scrape $i | sort -u) )
+        for j in ${links[@]}
+        do
+                check $j
+        done
+    done
 }
 main() {
     echo "url: $url"
     [[ ! $url =~ http[s]?://.* ]] && url="https://${url}" &&echo -e "\e[1;93mNo scheme specified, using default https scheme\e[0m"
     vuln $url
-    count=${#list[@]}
-    if [[ $count == 0 ]]
+    if [ ${#list[@]} -eq 0 ]
     then
         echo -e "\e[1;91mNO LINKS FOUND IN THIS DOMAIN :(\e[0m\nURL used: $url" >&2
         exit 5
