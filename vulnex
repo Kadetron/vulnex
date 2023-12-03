@@ -3,26 +3,27 @@
 declare -a links
 declare -a list
 
-    if [ -p /dev/stdin ]
-    then
-        read url
+if [ -p /dev/stdin ]
+then
+    read url
+#elif [ -z "$*" ]
+#then
+#   banner
+#   echo -en "\e[1;36mEnter the URL: \e[0m"
+#   read url
+else
+    url=$1
+fi
 
-    #elif [ -z "$*" ]
-    #then
-#           banner
-#        echo -en "\e[1;36mEnter the URL: \e[0m"
-       # read url
-    else
-        url=$1
-
-    fi
 user_agent="Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101 Firefox/91.0"
+
 scrape() {
     baseUrl=$(echo $1 | awk -F "/" '{print $1 "/" $2 "/" $3}')
     dotUrl=$(echo ${1} | awk -F "?" '{print $1}' | sed -E 's>(/$)>>')
     ddotUrl=$(echo ${dotUrl} | sed -E -e 's>(.*\/)[^\/]+$>\1>' -e 's>(/$)>>')
     curl -H 'Accept-Language: en-US,en;q=0.5' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8' -A "$user_agent" -s -L "$1" | grep -Eo "href=[\"'][^#][^\"']+" | sed -E "s>href=(\"|')(\".*)?>>g" | sed -E -e "s>^(\/\/).+>https:&>" -e "s>^(\.\.)[\/](.*)>${ddotUrl}\/\2>" -e "s>^[\~\/|\/](.*)>$baseUrl\/\1>" -e "/^(http|tel)/!s>^(\.\/)?(.*)>${dotUrl}\/\2>" -e "s> >%20>g"
 }
+
 check() {
     esc=$(printf '\033')
     result=$(echo $1 |  grep ".php")
@@ -34,6 +35,7 @@ check() {
         echo $1  | sed -e "s>^> ${esc}[1;30m\[NOT PARSABLE\]${esc}[0m      >"
     fi
 }
+
 vuln() {
     list=( $(scrape $url | sort -u) )
     for i in ${list[@]}
@@ -46,6 +48,7 @@ vuln() {
         done
     done
 }
+
 main() {
     echo "url: $url"
     [[ ! $url =~ http[s]?://.* ]] && url="https://${url}" &&echo -e "\e[1;93mNo scheme specified, using default https scheme\e[0m"
