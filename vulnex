@@ -72,7 +72,6 @@ vuln() {
 }
 
 main() {
-    echo "url: $url"
     [[ ! $url =~ http[s]?://.* ]] && url="https://${url}" &&echo -e "\e[1;93mNo scheme specified, using default https scheme\e[0m"
     vuln $url
     if [ ${#list[@]} -eq 0 ]
