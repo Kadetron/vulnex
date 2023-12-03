@@ -30,7 +30,7 @@ check() {
     if [ $? -eq 0 ]
     then
             PHP=$(echo $1 | sed -E -e "s>(.+\.php).*>\1\/%27%22%60>g")
-            curl -H 'Accept-Language: en-US,en;q=0.5' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8' -A "$user_agent" -s -L $PHP | grep -qs "You have an error in your SQL syntax;" && echo $PHP | sed -e "s>^> $esc[31m[VULNERABLE]$esc[0m        >" ||  echo $PHP | sed -e "s>^> $esc[32m[NOT VULNERABLE]$esc[0m    >" | sed -E "s>(\/%27%22%60)>\n>g"
+            curl -H 'Accept-Language: en-US,en;q=0.5' -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8' -A "$user_agent" -s -L $PHP | grep -qs "You have an error in your SQL syntax;" && echo $PHP | sed -e "s>^> $esc[31m[VULNERABLE]$esc[0m        >" ||  echo $PHP | sed -e "s>^> $esc[32m[NOT VULNERABLE]$esc[0m    >" | sed -E "s>(\/%27%22%60)>>g"
     else
         echo $1  | sed -e "s>^> ${esc}[1;30m\[NOT PARSABLE\]${esc}[0m      &>"
     fi
