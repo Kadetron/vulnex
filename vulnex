@@ -4,7 +4,7 @@ declare -a LINK
 declare -a ARR
 
 banner() {
-echo "
+echo -e "\e[37m
 
                                          ▄▄▄▄▄▄▄▄
                                        ▓▓▓▓▓▓▓▓▓▓▓▓
@@ -20,8 +20,7 @@ echo "
                                    ██      ▄▄▄▄      ██
                                    ██     vulnex     ██
                                    ▀██████████████████▀
-
-"
+\e[0m"
 }
 banner
 
