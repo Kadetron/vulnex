@@ -20,11 +20,12 @@ $ vulnex <domain>.<tld>
 
 ## Installation
 ```bash
-  git clone https://github.com/Kadetron/vulnex  
-  cd vulnex
-  sudo mv vulnex /usr/local/bin
-  cd ..
-  rm -r ./vulnex
+git clone https://github.com/Kadetron/vulnex  
+cd vulnex
+chmod +x vulnex
+sudo mv vulnex /usr/local/bin
+cd ..
+rm -r ./vulnex
 ```
 
 ## Dependency
