@@ -1,7 +1,7 @@
 #!/bin/bash
 
-declare -a links
-declare -a list
+declare -a LINK
+declare -a ARR
 
 banner() {
 echo "
@@ -59,22 +59,22 @@ check() {
 }
 
 vuln() {
-    list=( $(scrape $url | sort -u) )
-    for i in ${list[@]}
+    ARR=( $(scrape $url) )
+    for i in ${ARR[@]}
     do
         check $i
-        links=( $i $(scrape $i | sort -u) )
-        for j in ${links[@]}
-        do
+        LINK=( $i $(scrape $i) )
+        { for j in ${LINK[@]}
+          do
                 check $j
-        done
-    done
+          done } &
+    done | uniq
 }
 
 main() {
     [[ ! $url =~ http[s]?://.* ]] && url="https://${url}" &&echo -e "\e[1;93mNo scheme specified, using default https scheme\e[0m"
     vuln $url
-    if [ ${#list[@]} -eq 0 ]
+    if [ ${#ARR[@]} -eq 0 ]
     then
         echo -e "\e[1;91mNO LINKS FOUND IN THIS DOMAIN :(\e[0m\nURL used: $url" >&2
         exit 5
